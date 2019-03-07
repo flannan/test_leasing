@@ -21,6 +21,8 @@ $_POST['cost'] = '1000';
 $_POST['advancePayment'] = '0';
 $_POST['time'] = '3';
 $_POST['period'] = 'month';
+$_POST['paymentType'] = 're-calculating';
+$_POST['amortizationTime']='5';
 ?>
 <form name="form1" action="index.php" method="post">
     <p><b>Амортизационная группа транспортного средства:</b></p>
@@ -92,5 +94,12 @@ $_POST['period'] = 'month';
 
 </form>
 <output>
+    <?php
+    $payments=calculate();
+    var_export($payments);
+    foreach ($payments as $value) {
+        echo $value;
+    }
+    ?>
 </output>
 </html>
