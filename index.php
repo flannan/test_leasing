@@ -3,26 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Лизинговый Калькулятор</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 </body>
 <script>
     function updateMaxTime(f) {
-        f.time.max = f.amortizationTime * 1;
+        f.time.max = f.amortizationTime;
         //f.time.value = f.time.max;
         f.timeOutput.value = f.time.value;
     }
 </script>
 <?php
 require_once __DIR__ . '/backend.php';
-$_POST['purchaseType'] = '3';
-$_POST['cost'] = '1000';
-$_POST['advancePayment'] = '0';
-$_POST['time'] = '3';
-$_POST['period'] = 'month';
-$_POST['paymentType'] = 're-calculating';
-$_POST['amortizationTime']='5';
+if (empty($_POST)) {
+    $_POST['purchaseType'] = '3';
+    $_POST['cost'] = '1000';
+    $_POST['advancePayment'] = '0';
+    $_POST['time'] = '3';
+    $_POST['period'] = 'year';
+    $_POST['paymentType'] = 're-calculating';
+    $_POST['CreditRate'] = CreditRate();
+    $_POST['ProfitRate'] = ProfitRate();
+    $_POST['taxRate'] = taxRate();
+    $_POST['amortizationTime'] = '5';
+}
 ?>
 <form name="form1" action="index.php" method="post">
     <p><b>Амортизационная группа транспортного средства:</b></p>
@@ -48,9 +54,9 @@ $_POST['amortizationTime']='5';
         </label></p>
     <p><label>Аванс <input type="number" name="advancePayment" value="<?= $_POST['advancePayment'] ?>"> </label></p>
     <p><label>Срок лизинга
-            <input type="range" name="time" min="1" step="0.25"
-                   value="<?= $_POST['cost'] ?>" oninput="timeOutput.value=time.value">
-            <output name="timeOutput">5</output>
+            <input type="range" name="time" min="1" step="0.25" max="<?= $_POST['amortizationTime'] ?>"
+                   value="<?= $_POST['time'] ?>" oninput="timeOutput.value=time.value">
+            <output name="timeOutput"><?= $_POST['time'] ?></output>
             лет
         </label></p>
 
@@ -63,43 +69,56 @@ $_POST['amortizationTime']='5';
     <p><label><input type="radio" name="paymentType" value="flat">Равные платежи</label>
         <label><input type="radio" name="paymentType" value="re-calculating" checked>Спадающие платежи</label></p>
 
+    <input type="hidden" name="amortizationTime" value="<?= $_POST['amortizationTime']; ?>">
+    <input type="hidden" name="CreditRate" value="<?= $_POST['CreditRate']; ?>">
+    <input type="hidden" name="ProfitRate" value="<?= $_POST['ProfitRate']; ?>">
+    <input type="hidden" name="taxRate" value="<?= $_POST['taxRate']; ?>">
+
     <p>Срок амортизации
-        <output name="amortizationTime">
+        <output>
             <?php
             require_once __DIR__ . '/backend.php';
             echo number_format(amortizationTime());
             ?>
         </output>
         лет, банковская ставка по кредиту
-        <output name="CreditRate">
+        <output>
             <?php
             echo number_format(CreditRate());
             ?>
         </output>
         %, компенсация лизинговой компании и прочие услуги
-        <output name="ProfitRate">
+        <output>
             <?php
             echo number_format(ProfitRate());
             ?>
         </output>
         %, НДС
-        <output name="taxRate">
+        <output>
             <?php
             echo number_format(taxRate());
             ?>
         </output>
         %.
     </p>
+
     <input type="submit" value="Рассчитать"/>
 
 </form>
+
 <output>
     <?php
-    $payments=calculate();
-    var_export($payments);
-    foreach ($payments as $value) {
-        echo $value;
+    //var_dump($_POST);
+    $payments = calculate();
+    //$payments = [123];
+    echo '<table>' . "\n";
+    if (!empty($payments)) {
+        foreach ($payments as $key => $value) {
+            echo '<tr><td>' . ($key + 1) . '</td><td>' . sprintf('%.2f', $value) . '</td><tr>' . "\n";
+        }
     }
+    echo '</table>' . "\n";
     ?>
 </output>
+
 </html>

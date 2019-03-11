@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 /** Возвращает срок амортизации
  *
  * @return int
@@ -7,7 +8,7 @@ declare(strict_types=1);
 function amortizationTime()
 {
     if ($_POST) {
-        $amortizationType = $_POST['form1_purchaseType'];
+        $amortizationType = $_POST['purchaseType'];
     } else {
         $amortizationType = '3';
     }
@@ -57,15 +58,17 @@ function taxRate()
  */
 function calculate()
 {
+    $payments = [];
     if ($_POST) {
         $paymentType = $_POST['paymentType'];
         //$payments = [];
-        $numberOfPayments = $_POST['time'];
+        $numberOfPayments = (float)$_POST['time'];
         if ($_POST['period'] === 'quarter') {
             $numberOfPayments *= 4;
         } elseif ($_POST['period'] === 'month') {
             $numberOfPayments *= 12;
         }
+        $numberOfPayments = (int)ceil($numberOfPayments);
 
         if ($paymentType === 'flat') {
             $totalPayment = ($_POST['cost'] - $_POST['advancePayment']) * (1 +
@@ -73,13 +76,10 @@ function calculate()
                         + $_POST['ProfitRate'] / 100) * (1 + $_POST['taxRate'] / 100));
             $payments = array_fill(0, $numberOfPayments, $totalPayment / $numberOfPayments);
         } else {
-            $paymentPeriod = 1;
-            $amortizationTime = $_POST['amortizationTime'];
+            $amortizationTime = (int)$_POST['amortizationTime'];
             if ($_POST['period'] === 'quarter') {
-                $paymentPeriod = 0.25;
                 $amortizationTime *= 4;
             } elseif ($_POST['period'] === 'month') {
-                $paymentPeriod = 1 / 12;
                 $amortizationTime *= 12;
             }
             $cost = array_fill(0, $amortizationTime, $_POST['cost'] - $_POST['advancePayment']);
@@ -92,13 +92,18 @@ function calculate()
                 }
             }
             foreach ($cost as $key => $value) {
-                $payments[$key] = $value * ($_POST['CreditRate'] / 100 + $_POST['ProfitRate'] / 100)
-                    * (1 + $_POST['taxRate'] / 100)
-                    + $depreciation;
+                if ($key < $numberOfPayments) {
+                    $payments[$key] = $value * ($_POST['CreditRate'] / 100 + $_POST['ProfitRate'] / 100)
+                        * (1 + $_POST['taxRate'] / 100)
+                        + $depreciation;
+                }
             }
         }
-    } else {
-        $payments = [];
     }
     return $payments;
+}
+
+function payment_times()
+{
+
 }
