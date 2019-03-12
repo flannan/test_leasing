@@ -7,19 +7,53 @@ declare(strict_types=1);
  */
 function amortizationTime()
 {
+    $mysqli = new mysqli('localhost', 'stud08', 'stud08', 'test');
+    $sql = <<<SQL
+SELECT time
+FROM Amortization
+WHERE type=3
+SQL;
     if ($_POST) {
         $amortizationType = $_POST['purchaseType'];
-    } else {
-        $amortizationType = '3';
+        $sql = rtrim($sql, '1..9') . $amortizationType;
     }
-// заглушка
-    $amortizationTime = 5;
-    if ($amortizationType === '4') {
-        $amortizationTime = 7;
-    } elseif ($amortizationType === '5') {
-        $amortizationTime = 10;
+    //$sql=$sql.$amortizationType;
+
+    $res = $mysqli->query($sql);
+    $result = $res->fetch_row();
+    return $result[0];
+}
+
+/** создаёт радиокнопки по данным из базы данных.
+ *
+ * @return string
+ */
+function generateAmortizationGroups()
+{
+    $mysqli = new mysqli('localhost', 'stud08', 'stud08', 'test');
+    $sql = <<<SQL
+SELECT *
+FROM Amortization
+SQL;
+    $res = $mysqli->query($sql);
+    $result = $res->fetch_all();
+    //var_dump($result);
+
+    $output = '';
+    foreach ((array)$result as $type) {
+        $output = $output . '<p><label><input type="radio" name="purchaseType" value="' . $type[0] .
+            '" oninput="updateMaxTime(form1)" ';
+        if ($_POST['purchaseType'] === $type[0]) {
+            $output .= ' checked';
+        }
+        $output = $output . '> ' . $type[2] . ' </label></p>';
     }
-    return $amortizationTime;
+
+    return $output;
+    //foreach
+    //'<p><label>'
+    //<input type="radio" name="purchaseType" value="3" oninput="updateMaxTime(form1)" checked>
+//'</label></p>'
 }
 
 /** Возвращает процент по кредитам
@@ -28,8 +62,15 @@ function amortizationTime()
  */
 function CreditRate()
 {
-    // заглушка
-    return 15;
+    $mysqli = new mysqli('localhost', 'stud08', 'stud08', 'test');
+    $sql = <<<SQL
+SELECT CreditRate
+FROM Settings
+SQL;
+
+    $res = $mysqli->query($sql);
+    $result = $res->fetch_row();
+    return $result[0];
 }
 
 /** Возвращает компенсацию лизинговой компании (в процентах)
@@ -38,8 +79,15 @@ function CreditRate()
  */
 function ProfitRate()
 {
-    // заглушка
-    return 10;
+    $mysqli = new mysqli('localhost', 'stud08', 'stud08', 'test');
+    $sql = <<<SQL
+SELECT ProfitRate
+FROM Settings
+SQL;
+    //var_dump(CreditRate)
+    $res = $mysqli->query($sql);
+    $result = $res->fetch_row();
+    return $result[0];
 }
 
 /** Возвращает НДС
@@ -48,8 +96,15 @@ function ProfitRate()
  */
 function taxRate()
 {
-    // заглушка
-    return 15;
+    $mysqli = new mysqli('localhost', 'stud08', 'stud08', 'test');
+    $sql = <<<SQL
+SELECT TaxRate
+FROM Settings
+SQL;
+    //var_dump(CreditRate)
+    $res = $mysqli->query($sql);
+    $result = $res->fetch_row();
+    return $result[0];
 }
 
 /** performs actual calculations
@@ -93,8 +148,8 @@ function calculate()
             }
             foreach ($cost as $key => $value) {
                 if ($key < $numberOfPayments) {
-                    $payments[$key] = $value * ($_POST['CreditRate'] / 100 + $_POST['ProfitRate'] / 100)
-                        * (1 + $_POST['taxRate'] / 100)
+                    $payments[$key] = $value * ((int)$_POST['CreditRate'] / 100 + (int)$_POST['ProfitRate'] / 100)
+                        * (1 + (int)$_POST['taxRate'] / 100)
                         + $depreciation;
                 }
             }
@@ -103,7 +158,17 @@ function calculate()
     return $payments;
 }
 
-function payment_times()
+/** Для радиокнопок: Проверяет, что две строчки равны, и выдаёт checked, если это так.
+ * @param $value1
+ * @param $value2
+ *
+ * @return string
+ */
+function check($value1, $value2)
 {
-
+    $answer='';
+    if ($value1===$value2) {
+        $answer='checked';
+    }
+    return $answer;
 }

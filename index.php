@@ -8,13 +8,6 @@
 <body>
 
 </body>
-<script>
-    function updateMaxTime(f) {
-        f.time.max = f.amortizationTime;
-        //f.time.value = f.time.max;
-        f.timeOutput.value = f.time.value;
-    }
-</script>
 <?php
 require_once __DIR__ . '/backend.php';
 if (empty($_POST)) {
@@ -30,22 +23,19 @@ if (empty($_POST)) {
     $_POST['amortizationTime'] = '5';
 }
 ?>
+<script>
+    function updateMaxTime(f) {
+        f.time.max = <?= amortizationTime() ?>;
+        f.timeOutput.value = f.time.value;
+    }
+</script>
+<script src="xlsx.core.js"></script>
+<script src="FileSaver.js"></script>
+<script src="tableexport.js"></script>
+
 <form name="form1" action="index.php" method="post">
     <p><b>Амортизационная группа транспортного средства:</b></p>
-    <p><label>
-            <input type="radio" name="purchaseType" value="3" oninput="updateMaxTime(form1)" checked>
-            3я группа: легковые автомобили с бензиновым двигателем до 3.5л, грузовые автомобили до 3.5тонн, автобусы до
-            7,5м, мотоциклы, мотороллеры, мопеды, скутеры, велосипеды
-        </label>
-    </p>
-    <p><label><input type="radio" name="purchaseType" value="4" oninput="updateMaxTime(form1)">4ая группа: Автобусы от
-            7.5м до 12м, автобусы дальнего следования, автобусы городские от 16.5м до24м, самосвалы, бетоновозы,
-            лесовозы
-        </label></p>
-    <p><label><input type="radio" name="purchaseType" value="5" oninput="updateMaxTime(form1)">5ая группа: легковые
-            автомобили с двигателем выше 3.5л, легковые автомобили с дизельным двигателем, грузовые автомобили выше 3.5
-            тонн, автобусы прочие от 16.5 до 24м, автокраны.
-        </label></p>
+    <?php echo generateAmortizationGroups() ?>
 
     <p><label>
             Цена
@@ -60,57 +50,42 @@ if (empty($_POST)) {
             лет
         </label></p>
 
+
     <p><b>Период оплаты</b></p>
-    <p><label><input type="radio" name="period" value="month">месяц</label>
-        <label><input type="radio" name="period" value="quarter">квартал</label>
-        <label><input type="radio" name="period" value="year" checked>год</label></p>
-
-    <p><b>Тип оплаты</b></p>
-    <p><label><input type="radio" name="paymentType" value="flat">Равные платежи</label>
-        <label><input type="radio" name="paymentType" value="re-calculating" checked>Спадающие платежи</label></p>
-
-    <input type="hidden" name="amortizationTime" value="<?= $_POST['amortizationTime']; ?>">
-    <input type="hidden" name="CreditRate" value="<?= $_POST['CreditRate']; ?>">
-    <input type="hidden" name="ProfitRate" value="<?= $_POST['ProfitRate']; ?>">
-    <input type="hidden" name="taxRate" value="<?= $_POST['taxRate']; ?>">
-
-    <p>Срок амортизации
-        <output>
-            <?php
-            require_once __DIR__ . '/backend.php';
-            echo number_format(amortizationTime());
-            ?>
-        </output>
-        лет, банковская ставка по кредиту
-        <output>
-            <?php
-            echo number_format(CreditRate());
-            ?>
-        </output>
-        %, компенсация лизинговой компании и прочие услуги
-        <output>
-            <?php
-            echo number_format(ProfitRate());
-            ?>
-        </output>
-        %, НДС
-        <output>
-            <?php
-            echo number_format(taxRate());
-            ?>
-        </output>
-        %.
+    <p><label><input type="radio" name="period" value="month"
+                <?= check($_POST['period'], 'month') ?>>месяц</label>
+        <label><input type="radio" name="period" value="quarter"
+                <?= check($_POST['period'], 'quarter') ?> >квартал</label>
+        <label><input type="radio" name="period" value="year"
+                <?= check($_POST['period'], 'year') ?> >год</label>
     </p>
 
+    <p><b>Тип оплаты</b></p>
+    <p><label><input type="radio" name="paymentType" value="flat"
+                <?= check($_POST['paymentType'], 'flat') ?>>Равные платежи</label>
+        <label><input type="radio" name="paymentType" value="re-calculating"
+                <?= check($_POST['paymentType'], 're-calculating') ?>>Спадающие платежи</label></p>
+
+    <input type="hidden" name="amortizationTime" value="<?= (int)$_POST['amortizationTime']; ?>">
+    <input type="hidden" name="CreditRate" value="<?= (int)$_POST['CreditRate']; ?>">
+    <input type="hidden" name="ProfitRate" value="<?= (int)$_POST['ProfitRate']; ?>">
+    <input type="hidden" name="taxRate" value="<?= (int)$_POST['taxRate']; ?>">
+
+    <p>
+        <output>
+            Срок амортизации <?= $_POST['amortizationTime'] ?> лет,
+            банковская ставка по кредиту <?= $_POST['CreditRate'] ?> %,
+            компенсация лизинговой компании и прочие услуги <?= $_POST['ProfitRate'] ?> %,
+            НДС <?= $_POST['taxRate'] ?> %.
+        </output>
+    </p>
     <input type="submit" value="Рассчитать"/>
 
 </form>
 
 <output>
     <?php
-    //var_dump($_POST);
     $payments = calculate();
-    //$payments = [123];
     echo '<table>' . "\n";
     if (!empty($payments)) {
         foreach ($payments as $key => $value) {
@@ -119,6 +94,7 @@ if (empty($_POST)) {
     }
     echo '</table>' . "\n";
     ?>
-</output>
 
+</output>
+<script>new TableExport(document.getElementsByTagName("table"));</script>
 </html>
