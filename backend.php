@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 /** Возвращает срок амортизации
  *
+ * @param string $amortizationType
+ *
  * @return int
  */
-function amortizationTime($amortizationType = '')
+function amortizationTime($amortizationType = null)
 {
     $mysqli = new mysqli('localhost', 'stud08', 'stud08', 'test');
     $sql = <<<SQL
@@ -16,45 +18,13 @@ SQL;
     if (!empty($amortizationType)) {
         $sql = rtrim($sql, '1..9') . $amortizationType;
     } elseif ($_POST) {
-        $amortizationType = $_POST['purchaseType'];
+        $amortizationType = (string) $_POST['purchaseType'];
         $sql = rtrim($sql, '1..9') . $amortizationType;
     }
 
     $res = $mysqli->query($sql);
     $result = $res->fetch_row();
     return $result[0];
-}
-
-/** создаёт радиокнопки по данным из базы данных.
- *
- * @return string
- */
-function generateAmortizationGroups()
-{
-    $mysqli = new mysqli('localhost', 'stud08', 'stud08', 'test');
-    $sql = <<<SQL
-SELECT *
-FROM Amortization
-SQL;
-    $res = $mysqli->query($sql);
-    $result = $res->fetch_all();
-    //var_dump($result);
-
-    $output = '';
-    foreach ((array)$result as $type) {
-        $output = $output . '<p><label><input type="radio" name="purchaseType" value="' . $type[0] .
-            '" oninput="updateMaxTime(form1)" ';
-        if ($_POST['purchaseType'] === $type[0]) {
-            $output .= ' checked';
-        }
-        $output = $output . '> ' . $type[2] . ' </label></p>';
-    }
-
-    return $output;
-    //foreach
-    //'<p><label>'
-    //<input type="radio" name="purchaseType" value="3" oninput="updateMaxTime(form1)" checked>
-//'</label></p>'
 }
 
 /** Возвращает процент по кредитам

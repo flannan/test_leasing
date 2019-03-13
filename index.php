@@ -34,6 +34,7 @@ if (empty($_POST)) {
     function updateMaxTime(f,amortizationTime) {
         f.time.max = amortizationTime;
         f.timeOutput.value = f.time.value;
+        f.amortizationTime.value=amortizationTime;
     }
 </script>
 <script type="text/javascript" class="init">    $(document).ready(function () {
@@ -57,16 +58,22 @@ if (empty($_POST)) {
             <input type="radio" name="purchaseType" value="3"
                    oninput="updateMaxTime(form1,<?= amortizationTime('3') ?>)"
                 <?= check($_POST['purchaseType'], '3') ?> >
+            3я группа: легковые автомобили с бензиновым двигателем до 3.5л,
+            грузовые автомобили до 3.5тонн, автобусы до 7,5м, мотоциклы, мотороллеры, мопеды, скутеры, велосипеды
         </label></p>
     <p><label>
             <input type="radio" name="purchaseType" value="4"
                    oninput="updateMaxTime(form1,<?= amortizationTime('4') ?>)"
                 <?= check($_POST['purchaseType'], '4') ?> >
+            4ая группа: Автобусы от 7.5м до 12м, автобусы дальнего следования, автобусы городские от 16.5м до24м,
+            самосвалы, бетоновозы, лесовозы
         </label></p>
     <p><label>
             <input type="radio" name="purchaseType" value="5"
                    oninput="updateMaxTime(form1,<?= amortizationTime('5') ?>)"
                 <?= check($_POST['purchaseType'], '5') ?> >
+            5ая группа: легковые автомобили с двигателем выше 3.5л, легковые автомобили с дизельным двигателем,
+            грузовые автомобили выше 3.5 тонн, автобусы прочие от 16.5 до 24м, автокраны.
         </label></p>
 
     <p><label>
@@ -119,6 +126,8 @@ if (empty($_POST)) {
     <?php
     $payments = calculate();
     ?>
+    <p>Экспорт</p>
+
     <table id="outputTable" class="display">
         <thead>
         <tr>
@@ -126,9 +135,9 @@ if (empty($_POST)) {
             reshape($payments, $_POST['period']);
             foreach ((array)$payments[0] as $key => $value) {
                 if ($key % 2 === 0) {
-                    echo '<th>Number</th>' . "\n";
+                    echo '<th>№</th>' . "\n";
                 } else {
-                    echo '<th>Payment</th>' . "\n";
+                    echo '<th>Платёж</th>' . "\n";
                 }
             }
             ?>
@@ -139,7 +148,7 @@ if (empty($_POST)) {
         if (!empty($payments)) {
             foreach ($payments as $line) {
                 echo '<tr>';
-                foreach ($line as $value) {
+                foreach ((array) $line as $value) {
                     if (is_int($value)) {
                         echo '<td>' . $value . '</td>';
                     } else {
