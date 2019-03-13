@@ -159,6 +159,7 @@ function calculate()
 }
 
 /** Для радиокнопок: Проверяет, что две строчки равны, и выдаёт checked, если это так.
+ *
  * @param $value1
  * @param $value2
  *
@@ -166,9 +167,42 @@ function calculate()
  */
 function check($value1, $value2)
 {
-    $answer='';
-    if ($value1===$value2) {
-        $answer='checked';
+    $answer = '';
+    if ($value1 === $value2) {
+        $answer = 'checked';
     }
     return $answer;
+}
+
+/** делает из списка платежей аккуратную таблицу
+ * @param $payments
+ * @param $period
+ */
+function reshape(array &$payments, $period)
+{
+
+    if ($period === 'quarter') {
+        $paymentsPerYear = 4;
+    } elseif ($period === 'month') {
+        $paymentsPerYear = 12;
+    } else {
+        $paymentsPerYear = null;
+        foreach ($payments as $key => $value) {
+            $payments[$key] = [$key + 1, $value];
+        }
+    }
+
+    if (is_int($paymentsPerYear)) {
+        $newPayments = array_fill(0, (int) ceil(count($payments) / $paymentsPerYear), []);
+        $periodKey = 0;
+        foreach ($payments as $key => $value) {
+            $newPayments[$periodKey][] = $key+1;
+            $newPayments[$periodKey][] = $value;
+            $periodKey++;
+            if ($periodKey >= $paymentsPerYear) {
+                $periodKey = 0;
+            }
+        }
+        $payments = $newPayments;
+    }
 }

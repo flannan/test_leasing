@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Лизинговый Калькулятор</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/1.5.4/css/buttons.dataTables.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.4/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.html5.min.js"></script>
+
 </head>
 <body>
-
-</body>
 <?php
 require_once __DIR__ . '/backend.php';
 if (empty($_POST)) {
@@ -25,15 +32,28 @@ if (empty($_POST)) {
 ?>
 <script>
     function updateMaxTime(f) {
-        f.time.max = <?= amortizationTime() ?>;
+
+        f.time.max = "<?php echo amortizationTime() ?>";
         f.timeOutput.value = f.time.value;
+        f.time
     }
 </script>
-<script src="xlsx.core.js"></script>
-<script src="FileSaver.js"></script>
-<script src="tableexport.js"></script>
+<script type="text/javascript" class="init">    $(document).ready(function () {
+        $('#outputTable').DataTable({
+            dom    : 'Bfrtip',
+            buttons: [
+                'excelHtml5',
+                'pdfHtml5'
+            ],
+            pageLength : 12
+        });
+    });
+</script>
+
 
 <form name="form1" action="index.php" method="post">
+    <p><b>Лизинговый Калькулятор</b></p>
+
     <p><b>Амортизационная группа транспортного средства:</b></p>
     <?php echo generateAmortizationGroups() ?>
 
@@ -86,15 +106,41 @@ if (empty($_POST)) {
 <output>
     <?php
     $payments = calculate();
-    echo '<table>' . "\n";
-    if (!empty($payments)) {
-        foreach ($payments as $key => $value) {
-            echo '<tr><td>' . ($key + 1) . '</td><td>' . sprintf('%.2f', $value) . '</td><tr>' . "\n";
-        }
-    }
-    echo '</table>' . "\n";
     ?>
-
+    <table id="outputTable" class="display">
+        <thead>
+        <tr>
+            <?php
+            reshape($payments, $_POST['period']);
+            foreach ((array)$payments[0] as $key => $value) {
+                if ($key % 2 === 0) {
+                    echo '<th>Number</th>' . "\n";
+                } else {
+                    echo '<th>Payment</th>' . "\n";
+                }
+            }
+            ?>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        if (!empty($payments)) {
+            foreach ($payments as $line) {
+                echo '<tr>';
+                foreach ($line as $value) {
+                    if (is_int($value)) {
+                        echo '<td>' . $value . '</td>';
+                    } else {
+                        echo '<td>' . sprintf('%.2f', $value) . '</td>';
+                    }
+                }
+                echo '</tr>' . "\n";
+            }
+        }
+        ?>
+        </tbody>
+    </table>
 </output>
-<script>new TableExport(document.getElementsByTagName("table"));</script>
+</body>
+
 </html>
