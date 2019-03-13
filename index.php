@@ -17,6 +17,22 @@
 <body>
 <?php
 require_once __DIR__ . '/backend.php';
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+// create a log channel
+$log = new Logger('name');
+try {
+    $log->pushHandler(new StreamHandler(__DIR__ . '/requests.log', Logger::INFO));
+} catch (Exception $e) {
+    echo 'внимание, ваши запросы не записываются. ';
+    echo $e . "\n";
+}
+
+
+//default $_POST values
 if (empty($_POST)) {
     $_POST['purchaseType'] = '3';
     $_POST['cost'] = '1000';
@@ -31,10 +47,10 @@ if (empty($_POST)) {
 }
 ?>
 <script>
-    function updateMaxTime(f,amortizationTime) {
+    function updateMaxTime(f, amortizationTime) {
         f.time.max = amortizationTime;
         f.timeOutput.value = f.time.value;
-        f.amortizationTime.value=amortizationTime;
+        f.amortizationTime.value = amortizationTime;
     }
 </script>
 <script type="text/javascript" class="init">    $(document).ready(function () {
@@ -124,6 +140,7 @@ if (empty($_POST)) {
 
 <output>
     <?php
+    $log->info('received a calculation request ', $_POST);
     $payments = calculate();
     ?>
     <p>Экспорт</p>
@@ -148,7 +165,7 @@ if (empty($_POST)) {
         if (!empty($payments)) {
             foreach ($payments as $line) {
                 echo '<tr>';
-                foreach ((array) $line as $value) {
+                foreach ((array)$line as $value) {
                     if (is_int($value)) {
                         echo '<td>' . $value . '</td>';
                     } else {

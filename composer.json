@@ -1,5 +1,9 @@
 {
   "require": {
-    "ext-mysqli": "*"
+    "ext-mysqli"               : "*",
+    "monolog/monolog"          : "^1.24"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-master"
   }
 }
