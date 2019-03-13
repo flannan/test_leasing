@@ -31,21 +31,19 @@ if (empty($_POST)) {
 }
 ?>
 <script>
-    function updateMaxTime(f) {
-
-        f.time.max = "<?php echo amortizationTime() ?>";
+    function updateMaxTime(f,amortizationTime) {
+        f.time.max = amortizationTime;
         f.timeOutput.value = f.time.value;
-        f.time
     }
 </script>
 <script type="text/javascript" class="init">    $(document).ready(function () {
         $('#outputTable').DataTable({
-            dom    : 'Bfrtip',
-            buttons: [
+            dom       : 'Bfrtip',
+            buttons   : [
                 'excelHtml5',
                 'pdfHtml5'
             ],
-            pageLength : 12
+            pageLength: 12
         });
     });
 </script>
@@ -55,7 +53,21 @@ if (empty($_POST)) {
     <p><b>Лизинговый Калькулятор</b></p>
 
     <p><b>Амортизационная группа транспортного средства:</b></p>
-    <?php echo generateAmortizationGroups() ?>
+    <p><label>
+            <input type="radio" name="purchaseType" value="3"
+                   oninput="updateMaxTime(form1,<?= amortizationTime('3') ?>)"
+                <?= check($_POST['purchaseType'], '3') ?> >
+        </label></p>
+    <p><label>
+            <input type="radio" name="purchaseType" value="4"
+                   oninput="updateMaxTime(form1,<?= amortizationTime('4') ?>)"
+                <?= check($_POST['purchaseType'], '4') ?> >
+        </label></p>
+    <p><label>
+            <input type="radio" name="purchaseType" value="5"
+                   oninput="updateMaxTime(form1,<?= amortizationTime('5') ?>)"
+                <?= check($_POST['purchaseType'], '5') ?> >
+        </label></p>
 
     <p><label>
             Цена
