@@ -141,7 +141,7 @@ if (empty($_POST)) {
 <output>
     <?php
     $log->info('received a calculation request ', $_POST);
-    $payments = calculate();
+    $payments = calculate($_POST);
     ?>
     <p>Экспорт</p>
 
