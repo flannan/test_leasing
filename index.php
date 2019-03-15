@@ -14,7 +14,7 @@
     <script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.html5.min.js"></script>
 
 </head>
-<body>
+<body onload="updateTime(form1)">
 <?php
 require_once __DIR__ . '/backend.php';
 require_once __DIR__ . '/vendor/autoload.php';
@@ -47,14 +47,22 @@ if (empty($_POST)) {
 }
 ?>
 <script>
-    function updateMaxTime(f, amortizationTime) {
-        f.time.max = amortizationTime;
-        f.timeOutput.value = f.time.value;
-        f.amortizationTime.value = amortizationTime;
+    function updateMaxTime(form, amortizationTime) {
+        form.time.max = amortizationTime;
+        form.timeOutput.value = form.time.value;
+        form.amortizationTime.value = amortizationTime;
     }
 
-    function rightWordForYears(year) {
+    function updateTime(form) {
+        form.timeOutput.value = form.time.value;
 
+        if ("1" === form.time.value) {
+            form.wordForYears.value = "год";
+        } else if (5 > Number(form.time.value)) {
+            form.wordForYears.value = "года";
+        } else {
+            form.wordForYears.value = "лет";
+        }
     }
 </script>
 <script type="text/javascript" class="init">    $(document).ready(function () {
@@ -107,9 +115,9 @@ if (empty($_POST)) {
     <p><label>Аванс <input type="number" name="advancePayment" value="<?= $_POST['advancePayment'] ?>"> </label></p>
     <p><label>Срок лизинга
             <input type="range" name="time" min="1" step="0.25" max="<?= $_POST['amortizationTime'] ?>"
-                   value="<?= $_POST['time'] ?>" oninput="timeOutput.value=time.value">
+                   value="<?= $_POST['time'] ?>" oninput="updateTime(form1)">
             <output name="timeOutput"><?= $_POST['time'] ?></output>
-            <output name="wordforyears">года</output>
+            <output name="wordForYears">года</output>
         </label></p>
 
 
@@ -158,7 +166,7 @@ if (empty($_POST)) {
         <tr>
             <?php
             reshape($payments);
-            $payments[]=['Итого',$sum];
+            $payments[] = ['Итого', $sum];
             foreach ((array)$payments[0] as $key => $value) {
                 if ($key % 2 === 0) {
                     echo '<th>№</th>' . "\n";
