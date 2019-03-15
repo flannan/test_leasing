@@ -75,7 +75,8 @@ if (empty($_POST)) {
             pageLength: 12,
             language  : {
                 url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Russian.json"
-            }
+            },
+            ordering : false
         });
     });
 </script>
