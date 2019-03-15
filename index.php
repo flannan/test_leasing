@@ -52,6 +52,10 @@ if (empty($_POST)) {
         f.timeOutput.value = f.time.value;
         f.amortizationTime.value = amortizationTime;
     }
+
+    function rightWordForYears(year) {
+
+    }
 </script>
 <script type="text/javascript" class="init">    $(document).ready(function () {
         $('#outputTable').DataTable({
@@ -60,7 +64,10 @@ if (empty($_POST)) {
                 'excelHtml5',
                 'pdfHtml5'
             ],
-            pageLength: 12
+            pageLength: 12,
+            language  : {
+                url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Russian.json"
+            }
         });
     });
 </script>
@@ -102,7 +109,7 @@ if (empty($_POST)) {
             <input type="range" name="time" min="1" step="0.25" max="<?= $_POST['amortizationTime'] ?>"
                    value="<?= $_POST['time'] ?>" oninput="timeOutput.value=time.value">
             <output name="timeOutput"><?= $_POST['time'] ?></output>
-            лет
+            <output name="wordforyears">года</output>
         </label></p>
 
 
@@ -142,6 +149,7 @@ if (empty($_POST)) {
     <?php
     $log->info('received a calculation request ', $_POST);
     $payments = calculate($_POST);
+    $sum = array_sum($payments);
     ?>
     <p>Экспорт</p>
 
@@ -149,7 +157,7 @@ if (empty($_POST)) {
         <thead>
         <tr>
             <?php
-            reshape($payments, $_POST['period']);
+            reshape($payments);
             foreach ((array)$payments[0] as $key => $value) {
                 if ($key % 2 === 0) {
                     echo '<th>№</th>' . "\n";
@@ -162,22 +170,16 @@ if (empty($_POST)) {
         </thead>
         <tbody>
         <?php
-        if (!empty($payments)) {
-            foreach ($payments as $line) {
-                echo '<tr>';
-                foreach ((array)$line as $value) {
-                    if (is_int($value)) {
-                        echo '<td>' . $value . '</td>';
-                    } else {
-                        echo '<td>' . sprintf('%.2f', $value) . '</td>';
-                    }
-                }
-                echo '</tr>' . "\n";
-            }
+        foreach ($payments as $line) {
+            echo '<tr>';
+            echo '<td>' . $line[0] . '</td>';
+            echo '<td>' . number_format($line[1], 2, '.', ' ') . '</td>';
+            echo '</tr>' . PHP_EOL;
         }
         ?>
         </tbody>
     </table>
+    <p>Итого <?= $sum ?></p>
 </output>
 </body>
 
