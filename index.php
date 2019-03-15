@@ -158,6 +158,7 @@ if (empty($_POST)) {
         <tr>
             <?php
             reshape($payments);
+            $payments[]=['Итого',$sum];
             foreach ((array)$payments[0] as $key => $value) {
                 if ($key % 2 === 0) {
                     echo '<th>№</th>' . "\n";
@@ -170,6 +171,7 @@ if (empty($_POST)) {
         </thead>
         <tbody>
         <?php
+
         foreach ($payments as $line) {
             echo '<tr>';
             echo '<td>' . $line[0] . '</td>';
@@ -179,7 +181,6 @@ if (empty($_POST)) {
         ?>
         </tbody>
     </table>
-    <p>Итого <?= $sum ?></p>
 </output>
 </body>
 
